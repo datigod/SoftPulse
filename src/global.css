@@ -1,0 +1,76 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@600;700;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap");
+@font-face {
+  font-family: "Arial";
+  src: url("/public/Arial Regular.ttf");
+  font-weight: 400;
+}
+@font-face {
+  font-family: "Arial";
+  src: url("/public/arial-bold.ttf");
+  font-weight: 700;
+}
+@font-face {
+  font-family: "Arial";
+  src: url("/public/ariblk.ttf");
+  font-weight: 900;
+}
+
+body {
+  margin: 0;
+  line-height: normal;
+}
+:root {
+  /* fonts */
+  --font-arial: Arial;
+  --font-inter: Inter;
+  --font-poppins: Poppins;
+
+  /* font sizes */
+  --font-size-mini-8: 14.8px;
+  --font-size-5xl: 24px;
+  --font-size-xs: 12px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-4xl-1: 23.1px;
+  --font-size-3xl-5: 22.5px;
+  --font-size-base-9: 16.9px;
+  --font-size-mid: 17px;
+  --font-size-3xl-7: 22.7px;
+  --font-size-base-5: 16.5px;
+  --font-size-4xs-6: 8.6px;
+  --font-size-mid-2: 17.2px;
+  --font-size-3xl-6: 22.6px;
+  --font-size-base-1: 15.1px;
+  --font-size-sm: 14px;
+  --font-size-base-4: 15.4px;
+  --font-size-mini-6: 14.6px;
+  --font-size-mini-3: 14.3px;
+  --font-size-mini-4: 14.4px;
+  --font-size-mini-1: 14.1px;
+
+  /* Colors */
+  --softwarefindercom-nero: #fff;
+  --color-black: #000;
+  --color-darkcyan-100: #008ea1;
+  --color-darkslategray-100: #333;
+  --color-gainsboro: #e0e0e0;
+  --color-seashell: #faf1ed;
+  --color-steelblue-100: #07608d;
+
+  /* Gaps */
+  --gap-0: 0px;
+
+  /* Paddings */
+  --padding-12xs-5: 0.5px;
+  --padding-xl: 20px;
+
+  /* Border radiuses */
+  --br-xs: 12px;
+  --br-xl: 20px;
+  --br-7xs: 6px;
+  --br-5xs: 8px;
+  --br-mid-5: 17.5px;
+  --br-9xs: 4px;
+  --br-5xl: 24px;
+}
