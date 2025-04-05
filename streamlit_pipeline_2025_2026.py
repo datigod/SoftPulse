@@ -1,14 +1,14 @@
 import streamlit as st
 import pandas as pd
 import random
-from statsmodels.tsa.holtwinters import SimpleExpSmoothing
 import matplotlib.pyplot as plt
+from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 # Configuración de página
 st.set_page_config(layout="wide")
 
 # Título
-st.title("🌸 Pipeline Económico Jalmeidístico para la Producción de Flores")
+st.title("🌸 Pipeline Económico Jalmeidístico con Pronóstico SARIMAX")
 
 # Sidebar - Parámetros modificables
 st.sidebar.header("⚙️ Parámetros de Configuración")
@@ -18,21 +18,26 @@ horas_regulares = st.sidebar.slider("Horas Regulares por Operario", 100, 200, 16
 horas_extra = st.sidebar.slider("Horas Extra por Operario", 0, 80, 40)
 costo_hora_regular = st.sidebar.slider("Costo Hora Regular ($)", 10, 50, 20)
 costo_hora_extra = st.sidebar.slider("Costo Hora Extra ($)", 20, 70, 30)
-usar_pronostico = st.sidebar.checkbox("Usar Pronóstico", True)
+usar_pronostico = st.sidebar.checkbox("Usar SARIMAX desde enero 2026", True)
 
-# Datos base
-meses = ['ene-25', 'feb-25', 'mar-25', 'abr-25', 'may-25', 'jun-25',
-         'jul-25', 'ago-25', 'sep-25', 'oct-25', 'nov-25', 'dic-25']
+# Datos base históricos (hasta diciembre 2025)
+meses_2025 = ['ene-25', 'feb-25', 'mar-25', 'abr-25', 'may-25', 'jun-25',
+              'jul-25', 'ago-25', 'sep-25', 'oct-25', 'nov-25', 'dic-25']
 demanda_cosecha_real = [6, 9, 6, 7, 11, 6, 7, 7, 7, 6, 7, 7]
 demanda_postcosecha_real = [432, 636, 399, 468, 754, 389, 469, 449, 470, 426, 482, 517]
 
-# Pronóstico
+# Predicción con SARIMAX a partir de enero 2026
 if usar_pronostico:
-    modelo_post = SimpleExpSmoothing(demanda_postcosecha_real).fit(smoothing_level=0.6)
-    demanda_postcosecha = modelo_post.forecast(12).round(0).tolist()
-    modelo_cosecha = SimpleExpSmoothing(demanda_cosecha_real).fit(smoothing_level=0.6)
-    demanda_cosecha = modelo_cosecha.forecast(12).round(0).tolist()
+    modelo_cosecha = SARIMAX(demanda_cosecha_real, order=(1, 0, 0), seasonal_order=(0, 1, 1, 12)).fit(disp=False)
+    forecast_cosecha = modelo_cosecha.forecast(steps=12).round().tolist()
+    modelo_post = SARIMAX(demanda_postcosecha_real, order=(1, 0, 0), seasonal_order=(0, 1, 1, 12)).fit(disp=False)
+    forecast_post = modelo_post.forecast(steps=12).round().tolist()
+    meses = ['ene-26', 'feb-26', 'mar-26', 'abr-26', 'may-26', 'jun-26',
+             'jul-26', 'ago-26', 'sep-26', 'oct-26', 'nov-26', 'dic-26']
+    demanda_cosecha = forecast_cosecha
+    demanda_postcosecha = forecast_post
 else:
+    meses = meses_2025
     demanda_cosecha = demanda_cosecha_real
     demanda_postcosecha = demanda_postcosecha_real
 
@@ -60,13 +65,11 @@ total_extras = 0
 for i in range(12):
     horas_cosecha_reg = min(demanda_cosecha[i], operarios_cosecha * horas_regulares)
     horas_cosecha_ext = max(0, demanda_cosecha[i] - horas_cosecha_reg)
-
     horas_post_reg = min(demanda_postcosecha[i], operarios_postcosecha * horas_regulares)
     horas_post_ext = max(0, demanda_postcosecha[i] - horas_post_reg)
 
     total_horas_reg = horas_cosecha_reg + horas_post_reg
     total_horas_ext = horas_cosecha_ext + horas_post_ext
-
     costo_total_cosecha = horas_cosecha_reg * costo_hora_regular + horas_cosecha_ext * costo_hora_extra
     costo_total_post = horas_post_reg * costo_hora_regular + horas_post_ext * costo_hora_extra
     costo_total_mes = costo_total_cosecha + costo_total_post
@@ -101,26 +104,47 @@ for i in range(12):
 
 df = pd.DataFrame(reporte)
 
-# Mostrar métricas económicas agregadas
+# Métricas
 st.subheader("💰 Costos Anuales Acumulados")
 col1, col2 = st.columns(2)
 col1.metric("💼 Costo Total Horas Regulares", f"${round(total_regulares, 2):,}")
 col2.metric("🕒 Costo Total Horas Extra", f"${round(total_extras, 2):,}")
 
-# Mostrar tabla
+# Tabla
 st.subheader("📋 Resultados Mensuales")
 st.dataframe(df, use_container_width=True)
 
-# Gráfico 1: Costos Totales
+# Gráfico 1: Costo total por mes
 st.subheader("📊 Costo Total de Operación Mensual")
-fig, ax = plt.subplots(figsize=(14, 5))
+fig, ax = plt.subplots(figsize=(14, 5), facecolor='none')
 ax.plot(df["Mes"], df["Costo Total Mes ($)"], marker='o', label="Costo Total")
 ax.bar(df["Mes"], df["Costo Cosecha ($)"], alpha=0.6, label="Cosecha")
 ax.bar(df["Mes"], df["Costo Postcosecha ($)"], alpha=0.6, bottom=df["Costo Cosecha ($)"], label="Postcosecha")
 ax.set_ylabel("Costo ($)")
 ax.set_xlabel("Mes")
-ax.set_title("Costo Total de Operación Mensual")
 ax.legend()
 ax.grid(True)
 plt.xticks(rotation=45)
 st.pyplot(fig, clear_figure=True)
+
+# Gráfico 2: Demanda vs Capacidad
+st.subheader("📊 Demanda vs Capacidad")
+fig2, axes = plt.subplots(2, 1, figsize=(14, 8), facecolor='none', sharex=True)
+
+# Cosecha
+axes[0].bar(meses, df["Demanda Cosecha (H.H)"], label="Demanda", color='skyblue')
+axes[0].plot(meses, [capacidad_total_cosecha]*12, '--o', color='green', label="Capacidad")
+axes[0].set_title("Cosecha: Demanda vs Capacidad")
+axes[0].legend()
+axes[0].grid(True)
+
+# Postcosecha
+axes[1].bar(meses, df["Demanda Postcosecha (H.H)"], label="Demanda", color='orange')
+axes[1].plot(meses, [capacidad_total_postcosecha]*12, '--o', color='green', label="Capacidad")
+axes[1].set_title("Postcosecha: Demanda vs Capacidad")
+axes[1].legend()
+axes[1].grid(True)
+
+plt.xticks(rotation=45)
+plt.tight_layout()
+st.pyplot(fig2, clear_figure=True)
