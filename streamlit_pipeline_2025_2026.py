@@ -9,7 +9,7 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX
 st.set_page_config(layout="wide")
 
 # Título
-st.title("🌸 Pipeline Modelo de Flores con SARIMAX (Simplificado)")
+st.title("🌸 Pipeline Económico Jalmeidístico con SARIMAX (Simplificado)")
 
 # Sidebar - Parámetros modificables
 st.sidebar.header("⚙️ Parámetros de Configuración")
@@ -112,8 +112,8 @@ st.dataframe(df, use_container_width=True)
 st.subheader("📊 Costo Total de Operación Mensual")
 fig, ax = plt.subplots(figsize=(14, 5), facecolor=None)
 ax.plot(df["Mes"], df["Costo Total Mes ($)"], marker='o', label="Costo Total")
-ax.bar(df["Mes"], df["Costo Cosecha ($)"], alpha=0.6, label="Cosecha")
-ax.bar(df["Mes"], df["Costo Postcosecha ($)"], alpha=0.6, bottom=df["Costo Cosecha ($)"], label="Postcosecha")
+ax.bar(df["Mes"], df["Costo Cosecha ($)"], alpha=0.8, color='#1f77b4', label="Cosecha")
+ax.bar(df["Mes"], df["Costo Postcosecha ($)"], alpha=0.8, bottom=df["Costo Cosecha ($)"], color='#ff7f0e', label="Postcosecha")
 ax.legend()
 ax.grid(True)
 plt.xticks(rotation=45)
