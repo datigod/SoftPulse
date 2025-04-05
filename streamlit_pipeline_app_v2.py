@@ -11,8 +11,8 @@ st.set_page_config(layout="wide")
 st.title("🌺 Gemelo Digital de Producción - Flores 2025-2026")
 
 st.sidebar.header("⚙️ Parámetros del Sistema")
-operarios_cosecha = st.sidebar.slider("Operarios en Cosecha", 5, 30, 10)
-operarios_postcosecha = st.sidebar.slider("Operarios en Postcosecha", 5, 30, 10)
+operarios_cosecha = st.sidebar.slider("Operarios en Cosecha", 1, 30, 20)
+operarios_postcosecha = st.sidebar.slider("Operarios en Postcosecha", 1, 30, 20)
 horas_regulares = st.sidebar.slider("Horas Regulares por Operario", 100, 200, 160)
 horas_extra = st.sidebar.slider("Horas Extra por Operario", 0, 80, 40)
 
