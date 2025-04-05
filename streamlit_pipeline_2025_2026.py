@@ -4,6 +4,9 @@ import random
 from statsmodels.tsa.holtwinters import SimpleExpSmoothing
 import matplotlib.pyplot as plt
 
+# Configuración de página
+st.set_page_config(layout="wide")
+
 # Título
 st.title("🌸 Pipeline Económico Jalmeidístico para la Producción de Flores")
 
@@ -99,26 +102,25 @@ for i in range(12):
 df = pd.DataFrame(reporte)
 
 # Mostrar métricas económicas agregadas
-st.subheader("💰 Costos Acumulados del Año")
+st.subheader("💰 Costos Anuales Acumulados")
 col1, col2 = st.columns(2)
-col1.metric("Costo Total Horas Regulares ($)", f"{round(total_regulares, 2):,}")
-col2.metric("Costo Total Horas Extra ($)", f"{round(total_extras, 2):,}")
+col1.metric("💼 Costo Total Horas Regulares", f"${round(total_regulares, 2):,}")
+col2.metric("🕒 Costo Total Horas Extra", f"${round(total_extras, 2):,}")
 
 # Mostrar tabla
 st.subheader("📋 Resultados Mensuales")
-st.dataframe(df)
+st.dataframe(df, use_container_width=True)
 
-# Gráfico de costos
-st.subheader("📊 Costos Totales por Mes")
-import matplotlib.pyplot as plt
-fig, ax = plt.subplots(figsize=(12, 5))
+# Gráfico 1: Costos Totales
+st.subheader("📊 Costo Total de Operación Mensual")
+fig, ax = plt.subplots(figsize=(14, 5))
 ax.plot(df["Mes"], df["Costo Total Mes ($)"], marker='o', label="Costo Total")
 ax.bar(df["Mes"], df["Costo Cosecha ($)"], alpha=0.6, label="Cosecha")
-ax.bar(df["Mes"], df["Costo Postcosecha ($)"], alpha=0.6, label="Postcosecha", bottom=df["Costo Cosecha ($)"])
+ax.bar(df["Mes"], df["Costo Postcosecha ($)"], alpha=0.6, bottom=df["Costo Cosecha ($)"], label="Postcosecha")
 ax.set_ylabel("Costo ($)")
 ax.set_xlabel("Mes")
 ax.set_title("Costo Total de Operación Mensual")
 ax.legend()
 ax.grid(True)
 plt.xticks(rotation=45)
-st.pyplot(fig)
+st.pyplot(fig, clear_figure=True)
