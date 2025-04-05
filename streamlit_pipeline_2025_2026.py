@@ -17,7 +17,7 @@ operarios_postcosecha = st.sidebar.slider("Operarios Postcosecha", 1, 30, 10)
 horas_regulares = st.sidebar.slider("Horas Regulares por Operario", 100, 200, 160)
 horas_extra = st.sidebar.slider("Horas Extra por Operario", 0, 80, 40)
 costo_hora_regular = st.sidebar.slider("Costo Hora Regular ($)", 10, 50, 20)
-costo_hora_extra = st.sidebar.slider("Costo Hora Extra ($)", 20, 70, 30)
+costo_hora_extra = st.sidebar.slider("Costo Hora Extra ($)", 20, 70, 25)
 usar_pronostico = st.sidebar.checkbox("Usar SARIMAX desde enero 2026", True)
 
 # Datos base históricos (hasta diciembre 2025)
