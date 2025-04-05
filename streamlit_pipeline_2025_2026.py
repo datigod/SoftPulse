@@ -9,7 +9,7 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX
 st.set_page_config(layout="wide")
 
 # Título
-st.title("🌸 Pipeline Económico Jalmeidístico con SARIMAX (Simplificado)")
+st.title("🌸 Pipeline Flores con SARIMAX (Simplificado)")
 
 # Sidebar - Parámetros modificables
 st.sidebar.header("⚙️ Parámetros de Configuración")
