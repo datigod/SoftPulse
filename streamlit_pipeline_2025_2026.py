@@ -8,7 +8,7 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX
 st.set_page_config(layout="wide")
 
 # Título
-st.title("🌸 Pipeline Económico Jalmeidístico con Pronóstico SARIMAX")
+st.title("🌸 Pipeline Económico Jalmeidístico con SARIMAX (Simplificado)")
 
 # Sidebar - Parámetros modificables
 st.sidebar.header("⚙️ Parámetros de Configuración")
@@ -26,11 +26,11 @@ meses_2025 = ['ene-25', 'feb-25', 'mar-25', 'abr-25', 'may-25', 'jun-25',
 demanda_cosecha_real = [6, 9, 6, 7, 11, 6, 7, 7, 7, 6, 7, 7]
 demanda_postcosecha_real = [432, 636, 399, 468, 754, 389, 469, 449, 470, 426, 482, 517]
 
-# Predicción con SARIMAX a partir de enero 2026
+# Pronóstico con SARIMAX sin componente estacional
 if usar_pronostico:
-    modelo_cosecha = SARIMAX(demanda_cosecha_real, order=(1, 0, 0), seasonal_order=(0, 1, 1, 12)).fit(disp=False)
+    modelo_cosecha = SARIMAX(demanda_cosecha_real, order=(1, 1, 1), seasonal_order=(0, 0, 0, 0)).fit(disp=False)
     forecast_cosecha = modelo_cosecha.forecast(steps=12).round().tolist()
-    modelo_post = SARIMAX(demanda_postcosecha_real, order=(1, 0, 0), seasonal_order=(0, 1, 1, 12)).fit(disp=False)
+    modelo_post = SARIMAX(demanda_postcosecha_real, order=(1, 1, 1), seasonal_order=(0, 0, 0, 0)).fit(disp=False)
     forecast_post = modelo_post.forecast(steps=12).round().tolist()
     meses = ['ene-26', 'feb-26', 'mar-26', 'abr-26', 'may-26', 'jun-26',
              'jul-26', 'ago-26', 'sep-26', 'oct-26', 'nov-26', 'dic-26']
@@ -45,20 +45,13 @@ else:
 capacidad_total_cosecha = operarios_cosecha * (horas_regulares + horas_extra)
 capacidad_total_postcosecha = operarios_postcosecha * (horas_regulares + horas_extra)
 
-# Funciones para tiempos aleatorios
-def tiempo_corte_flor():
-    return random.uniform(2, 3) / 3600
+# Funciones de simulación
+def tiempo_corte_flor(): return random.uniform(2, 3) / 3600
+def tiempo_hidratacion(): return random.uniform(1, 2)
+def tiempo_clasificacion(): return random.uniform(30, 45) / 60
+def tiempo_empaque(): return random.uniform(20, 30) / 60
 
-def tiempo_hidratacion():
-    return random.uniform(1, 2)
-
-def tiempo_clasificacion():
-    return random.uniform(30, 45) / 60
-
-def tiempo_empaque():
-    return random.uniform(20, 30) / 60
-
-# Generar reporte
+# Reporte
 reporte = []
 total_regulares = 0
 total_extras = 0
@@ -114,31 +107,26 @@ col2.metric("🕒 Costo Total Horas Extra", f"${round(total_extras, 2):,}")
 st.subheader("📋 Resultados Mensuales")
 st.dataframe(df, use_container_width=True)
 
-# Gráfico 1: Costo total por mes
+# Costo total
 st.subheader("📊 Costo Total de Operación Mensual")
 fig, ax = plt.subplots(figsize=(14, 5), facecolor='none')
 ax.plot(df["Mes"], df["Costo Total Mes ($)"], marker='o', label="Costo Total")
 ax.bar(df["Mes"], df["Costo Cosecha ($)"], alpha=0.6, label="Cosecha")
 ax.bar(df["Mes"], df["Costo Postcosecha ($)"], alpha=0.6, bottom=df["Costo Cosecha ($)"], label="Postcosecha")
-ax.set_ylabel("Costo ($)")
-ax.set_xlabel("Mes")
 ax.legend()
 ax.grid(True)
 plt.xticks(rotation=45)
 st.pyplot(fig, clear_figure=True)
 
-# Gráfico 2: Demanda vs Capacidad
+# Gráfico de demanda vs capacidad
 st.subheader("📊 Demanda vs Capacidad")
 fig2, axes = plt.subplots(2, 1, figsize=(14, 8), facecolor='none', sharex=True)
-
-# Cosecha
 axes[0].bar(meses, df["Demanda Cosecha (H.H)"], label="Demanda", color='skyblue')
 axes[0].plot(meses, [capacidad_total_cosecha]*12, '--o', color='green', label="Capacidad")
 axes[0].set_title("Cosecha: Demanda vs Capacidad")
 axes[0].legend()
 axes[0].grid(True)
 
-# Postcosecha
 axes[1].bar(meses, df["Demanda Postcosecha (H.H)"], label="Demanda", color='orange')
 axes[1].plot(meses, [capacidad_total_postcosecha]*12, '--o', color='green', label="Capacidad")
 axes[1].set_title("Postcosecha: Demanda vs Capacidad")
