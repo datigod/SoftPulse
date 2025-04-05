@@ -2,13 +2,14 @@ import streamlit as st
 import pandas as pd
 import random
 import matplotlib.pyplot as plt
+plt.style.use('dark_background')
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 # Configuración de página
 st.set_page_config(layout="wide")
 
 # Título
-st.title("🌸 Pipeline Económico Jalmeidístico con SARIMAX (Simplificado)")
+st.title("🌸 Pipeline Modelo de Flores con SARIMAX (Simplificado)")
 
 # Sidebar - Parámetros modificables
 st.sidebar.header("⚙️ Parámetros de Configuración")
@@ -109,7 +110,7 @@ st.dataframe(df, use_container_width=True)
 
 # Costo total
 st.subheader("📊 Costo Total de Operación Mensual")
-fig, ax = plt.subplots(figsize=(14, 5), facecolor='none')
+fig, ax = plt.subplots(figsize=(14, 5), facecolor=None)
 ax.plot(df["Mes"], df["Costo Total Mes ($)"], marker='o', label="Costo Total")
 ax.bar(df["Mes"], df["Costo Cosecha ($)"], alpha=0.6, label="Cosecha")
 ax.bar(df["Mes"], df["Costo Postcosecha ($)"], alpha=0.6, bottom=df["Costo Cosecha ($)"], label="Postcosecha")
@@ -120,7 +121,7 @@ st.pyplot(fig, clear_figure=True)
 
 # Gráfico de demanda vs capacidad
 st.subheader("📊 Demanda vs Capacidad")
-fig2, axes = plt.subplots(2, 1, figsize=(14, 8), facecolor='none', sharex=True)
+fig2, axes = plt.subplots(2, 1, figsize=(14, 8), facecolor=None, sharex=True)
 axes[0].bar(meses, df["Demanda Cosecha (H.H)"], label="Demanda", color='skyblue')
 axes[0].plot(meses, [capacidad_total_cosecha]*12, '--o', color='green', label="Capacidad")
 axes[0].set_title("Cosecha: Demanda vs Capacidad")
