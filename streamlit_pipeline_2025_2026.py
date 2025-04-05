@@ -52,19 +52,24 @@ def tiempo_empaque():
 
 # Generar reporte
 reporte = []
+total_regulares = 0
+total_extras = 0
 for i in range(12):
-    falta_cosecha = demanda_cosecha[i] - (operarios_cosecha * horas_regulares)
-    falta_post = demanda_postcosecha[i] - (operarios_postcosecha * horas_regulares)
-
     horas_cosecha_reg = min(demanda_cosecha[i], operarios_cosecha * horas_regulares)
     horas_cosecha_ext = max(0, demanda_cosecha[i] - horas_cosecha_reg)
 
     horas_post_reg = min(demanda_postcosecha[i], operarios_postcosecha * horas_regulares)
     horas_post_ext = max(0, demanda_postcosecha[i] - horas_post_reg)
 
+    total_horas_reg = horas_cosecha_reg + horas_post_reg
+    total_horas_ext = horas_cosecha_ext + horas_post_ext
+
     costo_total_cosecha = horas_cosecha_reg * costo_hora_regular + horas_cosecha_ext * costo_hora_extra
     costo_total_post = horas_post_reg * costo_hora_regular + horas_post_ext * costo_hora_extra
     costo_total_mes = costo_total_cosecha + costo_total_post
+
+    total_regulares += total_horas_reg * costo_hora_regular
+    total_extras += total_horas_ext * costo_hora_extra
 
     estado_cosecha = "✅" if demanda_cosecha[i] <= capacidad_total_cosecha else f"❌ Faltan {demanda_cosecha[i] - capacidad_total_cosecha:.1f} H.H"
     estado_post = "✅" if demanda_postcosecha[i] <= capacidad_total_postcosecha else f"❌ Faltan {demanda_postcosecha[i] - capacidad_total_postcosecha:.1f} H.H"
@@ -92,11 +97,20 @@ for i in range(12):
     })
 
 df = pd.DataFrame(reporte)
+
+# Mostrar métricas económicas agregadas
+st.subheader("💰 Costos Acumulados del Año")
+col1, col2 = st.columns(2)
+col1.metric("Costo Total Horas Regulares ($)", f"{round(total_regulares, 2):,}")
+col2.metric("Costo Total Horas Extra ($)", f"{round(total_extras, 2):,}")
+
+# Mostrar tabla
 st.subheader("📋 Resultados Mensuales")
 st.dataframe(df)
 
 # Gráfico de costos
 st.subheader("📊 Costos Totales por Mes")
+import matplotlib.pyplot as plt
 fig, ax = plt.subplots(figsize=(12, 5))
 ax.plot(df["Mes"], df["Costo Total Mes ($)"], marker='o', label="Costo Total")
 ax.bar(df["Mes"], df["Costo Cosecha ($)"], alpha=0.6, label="Cosecha")
