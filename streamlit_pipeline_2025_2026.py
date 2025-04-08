@@ -6,7 +6,7 @@ plt.style.use('dark_background')
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 st.set_page_config(layout="wide")
-st.title("🌸 Pipeline Flores con SARIMAX (Horas por Tipo de Operario)")
+st.title("🌸 Pipeline - Proceso de Cosecha de Flores")
 
 st.sidebar.header("⚙️ Parámetros de Configuración")
 operarios_cosecha = st.sidebar.slider("Operarios Cosecha", 1, 30, 10)
