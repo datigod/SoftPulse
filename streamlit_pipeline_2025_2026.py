@@ -5,21 +5,23 @@ import matplotlib.pyplot as plt
 plt.style.use('dark_background')
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 
-# Configuración de página
 st.set_page_config(layout="wide")
-st.title("🌸 Pipeline Flores con SARIMAX (Simplificado)")
+st.title("🌸 Pipeline Flores con SARIMAX (Horas por Tipo de Operario)")
 
-# Sidebar - Parámetros modificables
 st.sidebar.header("⚙️ Parámetros de Configuración")
 operarios_cosecha = st.sidebar.slider("Operarios Cosecha", 1, 30, 10)
 operarios_postcosecha = st.sidebar.slider("Operarios Postcosecha", 1, 30, 10)
-horas_regulares = st.sidebar.number_input("Horas Regulares por Operario por Mes", min_value=0, max_value=200, value=160)
-horas_extra = st.sidebar.number_input("Horas Extra por Operario por Mes", min_value=0, max_value=160, value=80)
+
+st.sidebar.subheader("⏱️ Horas por Operario")
+horas_regulares_cosecha = st.sidebar.number_input("Horas Regulares por Operario - Cosecha", 0, 200, 160)
+horas_extra_cosecha = st.sidebar.number_input("Horas Extra por Operario - Cosecha", 0, 160, 80)
+horas_regulares_post = st.sidebar.number_input("Horas Regulares por Operario - Postcosecha", 0, 200, 160)
+horas_extra_post = st.sidebar.number_input("Horas Extra por Operario - Postcosecha", 0, 160, 80)
+
 costo_hora_regular = st.sidebar.slider("Costo Hora Regular ($)", 10, 50, 20)
 costo_hora_extra = st.sidebar.slider("Costo Hora Extra ($)", 20, 70, 25)
 usar_pronostico = st.sidebar.checkbox("Usar SARIMAX desde enero 2026", False)
 
-# Datos base históricos
 meses_2025 = ['ene-25', 'feb-25', 'mar-25', 'abr-25', 'may-25', 'jun-25',
               'jul-25', 'ago-25', 'sep-25', 'oct-25', 'nov-25', 'dic-25']
 demanda_cosecha_real = [6, 9, 6, 7, 11, 6, 7, 7, 7, 6, 7, 7]
@@ -39,8 +41,8 @@ else:
     demanda_cosecha = demanda_cosecha_real
     demanda_postcosecha = demanda_postcosecha_real
 
-capacidad_total_cosecha = operarios_cosecha * (horas_regulares + horas_extra)
-capacidad_total_postcosecha = operarios_postcosecha * (horas_regulares + horas_extra)
+capacidad_total_cosecha = operarios_cosecha * (horas_regulares_cosecha + horas_extra_cosecha)
+capacidad_total_postcosecha = operarios_postcosecha * (horas_regulares_post + horas_extra_post)
 
 def tiempo_corte_flor(): return random.uniform(2, 3) / 3600
 def tiempo_hidratacion(): return random.uniform(1, 2)
@@ -51,10 +53,19 @@ reporte = []
 total_regulares = 0
 total_extras = 0
 for i in range(12):
-    horas_cosecha_reg = min(demanda_cosecha[i], operarios_cosecha * horas_regulares)
-    horas_cosecha_ext = max(0, demanda_cosecha[i] - horas_cosecha_reg)
-    horas_post_reg = min(demanda_postcosecha[i], operarios_postcosecha * horas_regulares)
-    horas_post_ext = max(0, demanda_postcosecha[i] - horas_post_reg)
+    capacidad_reg_cosecha = operarios_cosecha * horas_regulares_cosecha
+    capacidad_ext_cosecha = operarios_cosecha * horas_extra_cosecha
+    capacidad_reg_post = operarios_postcosecha * horas_regulares_post
+    capacidad_ext_post = operarios_postcosecha * horas_extra_post
+
+    demanda_c = demanda_cosecha[i]
+    demanda_p = demanda_postcosecha[i]
+
+    horas_cosecha_reg = min(demanda_c, capacidad_reg_cosecha)
+    horas_cosecha_ext = min(max(0, demanda_c - horas_cosecha_reg), capacidad_ext_cosecha)
+
+    horas_post_reg = min(demanda_p, capacidad_reg_post)
+    horas_post_ext = min(max(0, demanda_p - horas_post_reg), capacidad_ext_post)
 
     total_horas_reg = horas_cosecha_reg + horas_post_reg
     total_horas_ext = horas_cosecha_ext + horas_post_ext
@@ -62,11 +73,11 @@ for i in range(12):
     costo_total_post = horas_post_reg * costo_hora_regular + horas_post_ext * costo_hora_extra
     costo_total_mes = costo_total_cosecha + costo_total_post
 
-    total_regulares += total_horas_reg * costo_hora_regular
-    total_extras += total_horas_ext * costo_hora_extra
+    total_regulares += horas_cosecha_reg * costo_hora_regular + horas_post_reg * costo_hora_regular
+    total_extras += horas_cosecha_ext * costo_hora_extra + horas_post_ext * costo_hora_extra
 
-    estado_cosecha = "✅" if demanda_cosecha[i] <= capacidad_total_cosecha else f"❌ Faltan {demanda_cosecha[i] - capacidad_total_cosecha:.1f} H.H"
-    estado_post = "✅" if demanda_postcosecha[i] <= capacidad_total_postcosecha else f"❌ Faltan {demanda_postcosecha[i] - capacidad_total_postcosecha:.1f} H.H"
+    estado_cosecha = "✅" if demanda_c <= (capacidad_reg_cosecha + capacidad_ext_cosecha) else f"❌ Faltan {demanda_c - (capacidad_reg_cosecha + capacidad_ext_cosecha):.1f} H.H"
+    estado_post = "✅" if demanda_p <= (capacidad_reg_post + capacidad_ext_post) else f"❌ Faltan {demanda_p - (capacidad_reg_post + capacidad_ext_post):.1f} H.H"
 
     corte = tiempo_corte_flor()
     hidratacion = tiempo_hidratacion()
@@ -75,10 +86,10 @@ for i in range(12):
 
     reporte.append({
         "Mes": meses[i],
-        "Demanda Cosecha (H.H)": demanda_cosecha[i],
+        "Demanda Cosecha (H.H)": demanda_c,
         "Capacidad Cosecha": capacidad_total_cosecha,
         "Cosecha": estado_cosecha,
-        "Demanda Postcosecha (H.H)": demanda_postcosecha[i],
+        "Demanda Postcosecha (H.H)": demanda_p,
         "Capacidad Postcosecha": capacidad_total_postcosecha,
         "Postcosecha": estado_post,
         "Costo Cosecha ($)": round(costo_total_cosecha, 2),
