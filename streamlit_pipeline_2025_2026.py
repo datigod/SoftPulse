@@ -21,17 +21,8 @@ horas_extra_post = st.sidebar.number_input("Horas Extra por Operario - Postcosec
 costo_hora_regular = st.sidebar.slider("Costo Hora Regular ($)", 10, 50, 20)
 costo_hora_extra = st.sidebar.slider("Costo Hora Extra ($)", 20, 70, 25)
 costo_fijo_operario = 16  # USD por operario por mes
-usar_pronostico = st.sidebar.checkbox("Usar SARIMAX desde enero 2026", False)
 
-st.sidebar.subheader("🔧 Tiempos Estándar de los Procesos")
-tiempo_corte_min = st.sidebar.number_input("Tiempo mínimo de Corte (segundos)", 1.0, 10.0, 2.0)
-tiempo_corte_max = st.sidebar.number_input("Tiempo máximo de Corte (segundos)", 1.0, 10.0, 3.0)
-tiempo_hidratacion_min = st.sidebar.number_input("Tiempo mínimo Hidratación (horas)", 0.5, 3.0, 1.0)
-tiempo_hidratacion_max = st.sidebar.number_input("Tiempo máximo Hidratación (horas)", 0.5, 3.0, 2.0)
-tiempo_clasificacion_min = st.sidebar.number_input("Tiempo mínimo Clasificación (minutos)", 10.0, 60.0, 30.0)
-tiempo_clasificacion_max = st.sidebar.number_input("Tiempo máximo Clasificación (minutos)", 10.0, 60.0, 45.0)
-tiempo_empaque_min = st.sidebar.number_input("Tiempo mínimo Empaque (minutos)", 5.0, 60.0, 20.0)
-tiempo_empaque_max = st.sidebar.number_input("Tiempo máximo Empaque (minutos)", 5.0, 60.0, 30.0)
+usar_pronostico = st.sidebar.checkbox("Usar SARIMAX desde enero 2026", False)
 
 meses_2025 = ['ene-25', 'feb-25', 'mar-25', 'abr-25', 'may-25', 'jun-25',
               'jul-25', 'ago-25', 'sep-25', 'oct-25', 'nov-25', 'dic-25']
@@ -52,13 +43,13 @@ else:
     demanda_cosecha = demanda_cosecha_real
     demanda_postcosecha = demanda_postcosecha_real
 
-def tiempo_corte_flor(): return random.uniform(tiempo_corte_min, tiempo_corte_max) / 3600
-def tiempo_hidratacion(): return random.uniform(tiempo_hidratacion_min, tiempo_hidratacion_max)
-def tiempo_clasificacion(): return random.uniform(tiempo_clasificacion_min, tiempo_clasificacion_max) / 60
-def tiempo_empaque(): return random.uniform(tiempo_empaque_min, tiempo_empaque_max) / 60
-
 capacidad_total_cosecha = operarios_cosecha * (horas_regulares_cosecha + horas_extra_cosecha)
 capacidad_total_postcosecha = operarios_postcosecha * (horas_regulares_post + horas_extra_post)
+
+def tiempo_corte_flor(): return random.uniform(2, 3) / 3600
+def tiempo_hidratacion(): return random.uniform(1, 2)
+def tiempo_clasificacion(): return random.uniform(30, 45) / 60
+def tiempo_empaque(): return random.uniform(20, 30) / 60
 
 reporte = []
 total_regulares = 0
@@ -82,8 +73,8 @@ for i in range(12):
     costo_total_cosecha = horas_cosecha_reg * costo_hora_regular + horas_cosecha_ext * costo_hora_extra
     costo_total_post = horas_post_reg * costo_hora_regular + horas_post_ext * costo_hora_extra
     costo_total_mes = costo_total_cosecha + costo_total_post
-
     costo_fijo_mes = (operarios_cosecha + operarios_postcosecha) * costo_fijo_operario
+
     total_fijos += costo_fijo_mes
     total_regulares += horas_cosecha_reg * costo_hora_regular + horas_post_reg * costo_hora_regular
     total_extras += horas_cosecha_ext * costo_hora_extra + horas_post_ext * costo_hora_extra
@@ -125,6 +116,7 @@ col4.metric("🧾 Costo Total", f"${round(total_regulares + total_extras + total
 st.subheader("📋 Reporte Mensual de Simulación")
 st.dataframe(df, use_container_width=True)
 
+# Gráficas
 st.subheader("📊 Capacidad vs Demanda")
 
 fig1, ax1 = plt.subplots(figsize=(10, 4))
