@@ -124,3 +124,27 @@ col4.metric("🧾 Costo Total", f"${round(total_regulares + total_extras + total
 
 st.subheader("📋 Reporte Mensual de Simulación")
 st.dataframe(df, use_container_width=True)
+
+st.subheader("📊 Capacidad vs Demanda")
+
+fig1, ax1 = plt.subplots(figsize=(10, 4))
+ax1.bar(df['Mes'], df['Demanda Cosecha (H.H)'], label='Demanda Cosecha', color='#EF476F')
+ax1.bar(df['Mes'], df['Capacidad Cosecha'], alpha=0.7, label='Capacidad Cosecha', color='#FFD166')
+ax1.set_title("Demanda vs Capacidad - Cosecha")
+ax1.legend()
+st.pyplot(fig1)
+
+fig2, ax2 = plt.subplots(figsize=(10, 4))
+ax2.bar(df['Mes'], df['Demanda Postcosecha (H.H)'], label='Demanda Postcosecha', color='#06D6A0')
+ax2.bar(df['Mes'], df['Capacidad Postcosecha'], alpha=0.7, label='Capacidad Postcosecha', color='#118AB2')
+ax2.set_title("Demanda vs Capacidad - Postcosecha")
+ax2.legend()
+st.pyplot(fig2)
+
+fig3, ax3 = plt.subplots(figsize=(10, 4))
+ax3.plot(df['Mes'], df['Costo Total Mes ($)'], marker='o', linestyle='-', color='#FFD166', label='Costo Total Mensual')
+ax3.set_title("Costo Total Mensual ($)")
+ax3.set_ylabel("USD")
+ax3.grid(True)
+ax3.legend()
+st.pyplot(fig3)
