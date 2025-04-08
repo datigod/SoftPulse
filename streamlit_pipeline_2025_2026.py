@@ -7,27 +7,24 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 # Configuración de página
 st.set_page_config(layout="wide")
-
-# Título
 st.title("🌸 Pipeline Flores con SARIMAX (Simplificado)")
 
 # Sidebar - Parámetros modificables
 st.sidebar.header("⚙️ Parámetros de Configuración")
 operarios_cosecha = st.sidebar.slider("Operarios Cosecha", 1, 30, 10)
 operarios_postcosecha = st.sidebar.slider("Operarios Postcosecha", 1, 30, 10)
-horas_regulares = st.sidebar.slider("Horas Regulares por Operario", 100, 200, 160)
-horas_extra = st.sidebar.slider("Horas Extra por Operario", 0, 160, 80)
+horas_regulares = st.sidebar.number_input("Horas Regulares por Operario por Mes", min_value=0, max_value=200, value=160)
+horas_extra = st.sidebar.number_input("Horas Extra por Operario por Mes", min_value=0, max_value=160, value=80)
 costo_hora_regular = st.sidebar.slider("Costo Hora Regular ($)", 10, 50, 20)
 costo_hora_extra = st.sidebar.slider("Costo Hora Extra ($)", 20, 70, 25)
 usar_pronostico = st.sidebar.checkbox("Usar SARIMAX desde enero 2026", False)
 
-# Datos base históricos (hasta diciembre 2025)
+# Datos base históricos
 meses_2025 = ['ene-25', 'feb-25', 'mar-25', 'abr-25', 'may-25', 'jun-25',
               'jul-25', 'ago-25', 'sep-25', 'oct-25', 'nov-25', 'dic-25']
 demanda_cosecha_real = [6, 9, 6, 7, 11, 6, 7, 7, 7, 6, 7, 7]
 demanda_postcosecha_real = [432, 636, 399, 468, 754, 389, 469, 449, 470, 426, 482, 517]
 
-# Pronóstico con SARIMAX sin componente estacional
 if usar_pronostico:
     modelo_cosecha = SARIMAX(demanda_cosecha_real, order=(1, 1, 1), seasonal_order=(0, 0, 0, 0)).fit(disp=False)
     forecast_cosecha = modelo_cosecha.forecast(steps=12).round().tolist()
@@ -42,17 +39,14 @@ else:
     demanda_cosecha = demanda_cosecha_real
     demanda_postcosecha = demanda_postcosecha_real
 
-# Capacidad total
 capacidad_total_cosecha = operarios_cosecha * (horas_regulares + horas_extra)
 capacidad_total_postcosecha = operarios_postcosecha * (horas_regulares + horas_extra)
 
-# Funciones de simulación
 def tiempo_corte_flor(): return random.uniform(2, 3) / 3600
 def tiempo_hidratacion(): return random.uniform(1, 2)
 def tiempo_clasificacion(): return random.uniform(30, 45) / 60
 def tiempo_empaque(): return random.uniform(20, 30) / 60
 
-# Reporte
 reporte = []
 total_regulares = 0
 total_extras = 0
@@ -98,17 +92,14 @@ for i in range(12):
 
 df = pd.DataFrame(reporte)
 
-# Métricas
 st.subheader("💰 Costos Anuales Acumulados")
 col1, col2 = st.columns(2)
 col1.metric("💼 Costo Total Horas Regulares", f"${round(total_regulares, 2):,}")
 col2.metric("🕒 Costo Total Horas Extra", f"${round(total_extras, 2):,}")
 
-# Tabla
 st.subheader("📋 Resultados Mensuales")
 st.dataframe(df, use_container_width=True)
 
-# Costo total
 st.subheader("📊 Costo Total de Operación Mensual")
 fig, ax = plt.subplots(figsize=(14, 5), facecolor=None)
 ax.plot(df["Mes"], df["Costo Total Mes ($)"], marker='o', label="Costo Total")
@@ -119,7 +110,6 @@ ax.grid(True)
 plt.xticks(rotation=45)
 st.pyplot(fig, clear_figure=True)
 
-# Gráfico de demanda vs capacidad
 st.subheader("📊 Demanda vs Capacidad")
 fig2, axes = plt.subplots(2, 1, figsize=(14, 8), facecolor=None, sharex=True)
 axes[0].bar(meses, df["Demanda Cosecha (H.H)"], label="Demanda", color='skyblue')
